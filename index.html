@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Анонимные собрания группы “Олдскул” в Уфе. Ул. Айская, 75/2. Поддержка людей, которые хотят прекратить употребление. Расписание, маршрут и контакты.">
+    <meta name="robots" content="index, follow">
+    <title>Группа Анонимных Наркоманов “Олдскул” в Уфе — собрания и поддержка</title>
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Playfair+Display:wght@700&amp;display=swap');
+        
+        :root {
+            --blue: #1e3a5f;
+            --cream: #f8f1e3;
+            --orange: #e07a3d;
+        }
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .heading-serif {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .section {
+            scroll-margin-top: 80px;
+        }
+
+        .warm-shadow {
+            box-shadow: 0 10px 15px -3px rgb(30 58 95 / 0.08), 0 4px 6px -4px rgb(30 58 95 / 0.08);
+        }
+
+        .nav-active {
+            color: #e07a3d;
+            font-weight: 600;
+        }
+
+        .meeting-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .meeting-card.highlight {
+            border-color: #e07a3d;
+            box-shadow: 0 0 0 3px rgba(224, 122, 61, 0.15);
+            background-color: #fffbeb;
+        }
+
+        .support-btn {
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+        
+        .support-btn:active {
+            transform: scale(0.985);
+        }
+
+        .story-card {
+            transition: transform 0.2s ease;
+        }
+        
+        .story-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .faq details {
+            transition: all 0.2s ease;
+        }
+        
+        .faq details[open] {
+            background-color: #fffbeb;
+        }
+
+        .soft-bg {
+            background-color: #f8f1e3;
+        }
+
+        .dark-blue {
+            background-color: #1e3a5f;
+            color: #f8f1e3;
+        }
+
+        .accent-orange {
+            color: #e07a3d;
+        }
+
+        .btn-primary {
+            background-color: #e07a3d;
+            color: white;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #c96a2f;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: #1e3a5f;
+            border: 2px solid #1e3a5f;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #f8f1e3;
+        }
+
+        .calm-text {
+            color: #334155;
+            line-height: 1.7;
+        }
+
+        .large-text {
+            font-size: 1.05rem;
+            line-height: 1.75;
+        }
+
+        .safe-banner {
+            background-color: #fef2f2;
+            border-left: 4px solid #ef4444;
+        }
+
+        .time-pill {
+            background-color: #f1e7d9;
+            color: #1e3a5f;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+        }
+        
+        .highlight-badge {
+            background-color: #e07a3d;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.1rem 0.6rem;
+            border-radius: 9999px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body class="bg-[#f8f1e3] text-[#1e3a5f] antialiased">
+    <!-- Safety banner -->
+    <div class="safe-banner border-b border-red-200 py-3 px-4 text-sm">
+        <div class="max-w-5xl mx-auto flex items-start gap-3">
+            <div class="flex-shrink-0 mt-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <p class="text-red-800 text-sm leading-snug">
+                <strong>Важно:</strong> АН — сообщество взаимопомощи, а не медицинская организация. 
+                Если существует угроза жизни, передозировка, потеря сознания или тяжёлое состояние — 
+                <strong>немедленно звоните 112</strong>.
+            </p>
+        </div>
+    </div>
+
+    <!-- Top navigation -->
+    <nav class="bg-white/95 backdrop-blur-md border-b border-[#e7d9c8] sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-[#1e3a5f] rounded-2xl flex items-center justify-center">
+                    <span class="text-[#f8f1e3] text-xl font-bold tracking-tighter">ОС</span>
+                </div>
+                <div>
+                    <div class="font-semibold tracking-tight text-xl">Олдскул</div>
+                    <div class="text-[10px] text-[#64748b] -mt-1">АН • Уфа</div>
+                </div>
+            </div>
+            
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium">
+                <a href="#you-can" class="hover:text-[#e07a3d] transition-colors">Ты можешь прийти</a>
+                <a href="#what-happens" class="hover:text-[#e07a3d] transition-colors">Что будет на собрании</a>
+                <a href="#schedule" class="hover:text-[#e07a3d] transition-colors">Расписание</a>
+                <a href="#contacts" class="hover:text-[#e07a3d] transition-colors">Контакты</a>
+            </div>
+            
+            <button onclick="document.getElementById('support-modal').classList.remove('hidden'); document.getElementById('support-modal').classList.add('flex')"
+                    class="hidden md:block px-5 py-2.5 text-sm font-semibold rounded-2xl bg-[#e07a3d] text-white hover:bg-[#c96a2f] transition-all active:scale-[0.985]">
+                Мне нужна поддержка
+            </button>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="max-w-6xl mx-auto px-6 pt-12 pb-16 md:pt-16 md:pb-20">
+        <div class="max-w-3xl">
+            <div class="inline-flex items-center gap-2 bg-white px-4 py-1.5 rounded-3xl text-sm font-medium mb-6 border border-[#e7d9c8]">
+                <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                <span>Группа АН «Олдскул» • Уфа</span>
+            </div>
+            
+            <h1 class="heading-serif text-5xl md:text-6xl lg:text-7xl leading-[1.05] tracking-tighter mb-6">
+                Тебе не нужно<br>справляться с этим<br>одному
+            </h1>
+            
+            <p class="text-2xl md:text-3xl text-[#475569] leading-tight mb-8 max-w-2xl">
+                Если ты сорвался, снова употребил или просто устал жить по-старому — 
+                сделай один небольшой шаг.
+            </p>
+            
+            <!-- Nearest meeting info -->
+            <div id="hero-nearest" 
+                 class="bg-white border border-[#e7d9c8] rounded-3xl p-6 mb-8 warm-shadow max-w-md">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 01-9 9 9 9 0 01-9-9 9 9 0 019-9 9 9 0 019 9z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-xs uppercase tracking-[1px] text-[#64748b] font-semibold">Ближайшее собрание</div>
+                        <div id="nearest-text" class="font-semibold text-xl text-[#1e3a5f]"></div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 text-[#475569]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314-11.314z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="text-sm">ул. Айская, 75/2 • вход с торца</span>
+                </div>
+            </div>
+            
+            <!-- Main CTAs -->
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="document.getElementById('schedule').scrollIntoView({ behavior: 'smooth', block: 'start' })" 
+                        class="btn-primary flex-1 sm:flex-none px-8 py-4 text-lg font-semibold rounded-3xl flex items-center justify-center gap-2 shadow-sm">
+                    <span>Узнать ближайшее собрание</span>
+                </button>
+                
+                <button onclick="openWhatsApp()" 
+                        class="btn-secondary flex-1 sm:flex-none px-8 py-4 text-lg font-semibold rounded-3xl flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    <span>Написать участнику</span>
+                </button>
+            </div>
+            
+            <div class="mt-4 flex flex-wrap gap-2 text-sm">
+                <button onclick="document.getElementById('map-section').scrollIntoView({ behavior: 'smooth' })" 
+                        class="px-4 py-2 rounded-2xl border border-[#d1c3a8] hover:bg-white text-sm font-medium flex items-center gap-1.5 transition-colors">
+                    <span>Построить маршрут</span>
+                </button>
+                <a href="tel:+79173838380" 
+                   class="px-4 py-2 rounded-2xl border border-[#d1c3a8] hover:bg-white text-sm font-medium flex items-center gap-1.5 transition-colors">
+                    Позвонить сейчас
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust bar -->
+    <div class="border-y border-[#e7d9c8] bg-white py-4">
+        <div class="max-w-5xl mx-auto px-6">
+            <div class="flex flex-wrap justify-center md:justify-between items-center gap-x-8 gap-y-3 text-sm font-medium text-[#475569]">
+                <div class="flex items-center gap-2">
+                    <span class="text-emerald-600">●</span> Анонимно
+                </div>
+                <div>Без осуждения</div>
+                <div>Без обязательных взносов</div>
+                <div>Можно просто послушать</div>
+                <div>Неважно, что и сколько употреблял</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- YOU CAN COME IF -->
+    <section id="you-can" class="max-w-6xl mx-auto px-6 py-16 md:py-20 section">
+        <div class="max-w-2xl mb-10">
+            <h2 class="heading-serif text-4xl md:text-5xl tracking-tighter mb-4">Ты можешь прийти, если…</h2>
+            <p class="large-text text-[#475569]">Никто не будет спрашивать, почему ты здесь. Главное — ты хочешь изменить что-то в своей жизни.</p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 gap-4 max-w-4xl">
+            <div class="bg-white rounded-3xl p-6 border border-[#e7d9c8] flex gap-4">
+                <div class="mt-1 text-[#e07a3d]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7" />
+                    </svg>
+                </div>
+                <div class="calm-text">снова употребил</div>
+            </div>
+            <div class="bg-white rounded-3xl p-6 border border-[#e7d9c8] flex gap-4">
+                <div class="mt-1 text-[#e07a3d]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div class="calm-text">боишься очередного срыва</div>
+            </div>
+            <div class="bg-white rounded-3xl p-6 border border-[#e7d9c8] flex gap-4">
+                <div class="mt-1 text-[#e07a3d]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                    </svg>
+                </div>
+                <div class="calm-text">не можешь остановиться самостоятельно</div>
+            </div>
+            <div class="bg-white rounded-3xl p-6 border border-[#e7d9c8] flex gap-4">
+                <div class="mt-1 text-[#e07a3d]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div class="calm-text">тебе стыдно или страшно просить помощи</div>
+            </div>
+            <div class="bg-white rounded-3xl p-6 border border-[#e7d9c8] flex gap-4 md:col-span-2">
+                <div class="mt-1 text-[#e07a3d]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 4.01V8" />
+                    </svg>
+                </div>
+                <div class="calm-text">хочешь прожить хотя бы один день без употребления</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WHAT HAPPENS -->
+    <section id="what-happens" class="bg-white border-y border-[#e7d9c8] py-16 md:py-20 section">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="max-w-2xl mb-10">
+                <h2 class="heading-serif text-4xl md:text-5xl tracking-tighter mb-4">Что будет на первом собрании</h2>
+                <p class="large-text text-[#475569]">Ты можешь просто прийти и посидеть. Никто не заставит тебя говорить.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl">
+                <div class="p-6 rounded-3xl border border-[#e7d9c8]">
+                    <div class="w-10 h-10 bg-[#f1e7d9] rounded-2xl flex items-center justify-center mb-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 01-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 01-2 2 2 2 0 01-2-2 2 2 0 012-2 2 2 0 012 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-lg mb-2">Люди делятся личным опытом</h3>
+                    <p class="text-[#475569]">Это не лекция и не сеанс групповой терапии. Просто разговор тех, кто сам через это прошёл.</p>
+                </div>
+                
+                <div class="p-6 rounded-3xl border border-[#e7d9c8]">
+                    <div class="w-10 h-10 bg-[#f1e7d9] rounded-2xl flex items-center justify-center mb-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-lg mb-2">Можно просто слушать</h3>
+                    <p class="text-[#475569]">Никто не требует рассказывать подробности жизни. Анонимность уважается.</p>
+                </div>
+                
+                <div class="p-6 rounded-3xl border border-[#e7d9c8]">
+                    <div class="w-10 h-10 bg-[#f1e7d9] rounded-2xl flex items-center justify-center mb-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1v-5m0 0l-4 4m4-4l4-4" />
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-lg mb-2">Можно просить встретить</h3>
+                    <p class="text-[#475569]">Напиши заранее — кто-то из участников встретит тебя у входа и проведет.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCHEDULE -->
+    <section id="schedule" class="max-w-6xl mx-auto px-6 py-16 md:py-20 section">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+            <div>
+                <h2 class="heading-serif text-4xl md:text-5xl tracking-tighter">Расписание собраний</h2>
+                <p class="mt-2 text-[#475569]">Приходи в любое удобное время. Записываться не нужно.</p>
+            </div>
+            <div class="text-sm px-4 py-2 bg-white border border-[#e7d9c8] rounded-2xl w-fit">
+                <span class="font-medium">ул. Айская, 75/2</span> • вход с торца
+            </div>
+        </div>
+        
+        <div id="schedule-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <!-- Populated by JS -->
+        </div>
+        
+        <div class="mt-6 text-xs text-[#64748b] flex items-center gap-2">
+            <div class="w-3 h-px bg-[#d1c3a8]"></div>
+            <span>Выделено ближайшее собрание (по твоему времени)</span>
+        </div>
+    </section>
+
+    <!-- MAP & ROUTE -->
+    <section id="map-section" class="bg-white border-y border-[#e7d9c8] py-16 section">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid lg:grid-cols-5 gap-8 items-center">
+                <div class="lg:col-span-2">
+                    <h2 class="heading-serif text-4xl tracking-tighter mb-4">Как нас найти</h2>
+                    <div class="space-y-4 text-[#475569]">
+                        <div>
+                            <div class="font-semibold text-[#1e3a5f]">Адрес</div>
+                            <div>ул. Айская, 75/2, Уфа</div>
+                            <div class="text-sm">Советский район • цокольный этаж</div>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-[#1e3a5f]">Ориентир</div>
+                            <div>Вход с торца здания</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex flex-col gap-3">
+                        <button onclick="openYandexMap()" 
+                                class="btn-primary w-full py-3.5 rounded-2xl font-semibold flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                            </svg>
+                            <span>Построить маршрут в Яндекс.Картах</span>
+                        </button>
+                        
+                        <button onclick="openGoogleMap()" 
+                                class="w-full py-3.5 rounded-2xl font-semibold border-2 border-[#1e3a5f] flex items-center justify-center gap-2 hover:bg-[#f8f1e3] transition-colors">
+                            <span>Открыть в Google Maps</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Map -->
+                <div class="lg:col-span-3">
+                    <div class="aspect-[16/10] rounded-3xl overflow-hidden border border-[#e7d9c8] shadow-sm">
+                        <iframe 
+                            src="https://yandex.ru/map-widget/v1/?text=Уфа%2C%20ул.%20%D0%90%D0%B9%D1%81%D0%BA%D0%B0%D1%8F%2C%2075%2F2&z=17" 
+                            width="100%" 
+                            height="100%" 
+                            frameborder="0" 
+                            allowfullscreen="true"
+                            style="border: 0; min-height: 320px;">
+                        </iframe>
+                    </div>
+                    <p class="text-xs text-[#64748b] mt-2 text-center">Вход с торца • цокольный этаж</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STORIES -->
+    <section class="max-w-6xl mx-auto px-6 py-16 md:py-20 section">
+        <div class="max-w-2xl mb-10">
+            <h2 class="heading-serif text-4xl md:text-5xl tracking-tighter mb-3">Истории людей, которым помогло сообщество</h2>
+            <p class="text-[#475569]">Каждый начинал с одного шага — просто прийти.</p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-5">
+            <!-- Story 1 -->
+            <div class="story-card bg-white p-7 rounded-3xl border border-[#e7d9c8]">
+                <div class="text-3xl mb-4 text-[#e07a3d]">“</div>
+                <p class="calm-text mb-6">Я пришёл на собрание прямо в состоянии употребления. Не знал, что говорить. Просто сидел в углу и слушал. Сегодня я живу без наркотиков уже больше десяти лет. Главное — я понял, что я не один.</p>
+                <div class="text-xs font-medium text-[#e07a3d]">История участника сообщества АН.<br>Это не отзыв о конкретной группе «Олдскул».</div>
+            </div>
+            
+            <!-- Story 2 -->
+            <div class="story-card bg-white p-7 rounded-3xl border border-[#e7d9c8]">
+                <div class="text-3xl mb-4 text-[#e07a3d]">“</div>
+                <p class="calm-text mb-6">После нескольких собраний я начал оставаться чистым день за днём. Раньше я думал, что это невозможно. Благодаря поддержке других зависимых я уже несколько лет живу без употребления.</p>
+                <div class="text-xs font-medium text-[#e07a3d]">История участника сообщества АН.<br>Это не отзыв о конкретной группе «Олдскул».</div>
+            </div>
+            
+            <!-- Story 3 -->
+            <div class="story-card bg-white p-7 rounded-3xl border border-[#e7d9c8]">
+                <div class="text-3xl mb-4 text-[#e07a3d]">“</div>
+                <p class="calm-text mb-6">Я потерял почти всё. После первых собраний начал потихоньку восстанавливать отношения с семьёй. Появилась надежда и возможность видеть жизнь по-другому. Я благодарен, что пришёл.</p>
+                <div class="text-xs font-medium text-[#e07a3d]">История участника сообщества АН.<br>Это не отзыв о конкретной группе «Олдскул».</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="max-w-4xl mx-auto px-6 pb-16 md:pb-20 section">
+        <h2 class="heading-serif text-4xl tracking-tighter mb-8">Частые вопросы</h2>
+        
+        <div class="faq space-y-3">
+            <details class="group bg-white border border-[#e7d9c8] rounded-3xl px-6 py-1">
+                <summary class="font-semibold py-4 cursor-pointer flex justify-between items-center text-lg">
+                    Это бесплатно?
+                    <span class="text-[#e07a3d] group-open:rotate-180 transition-transform">↓</span>
+                </summary>
+                <div class="pb-5 text-[#475569]">Да. В Анонимных Наркоманах нет обязательных взносов и платы за участие. Мы существуем на добровольные пожертвования тех, кто может и хочет поддержать сообщество.</div>
+            </details>
+            
+            <details class="group bg-white border border-[#e7d9c8] rounded-3xl px-6 py-1">
+                <summary class="font-semibold py-4 cursor-pointer flex justify-between items-center text-lg">
+                    Нужно ли записываться?
+                    <span class="text-[#e07a3d] group-open:rotate-180 transition-transform">↓</span>
+                </summary>
+                <div class="pb-5 text-[#475569]">Нет. Просто приходи. Можно прийти за 10–15 минут до начала. Если хочешь, чтобы тебя встретили у входа — напиши заранее.</div>
+            </details>
+            
+            <details class="group bg-white border border-[#e7d9c8] rounded-3xl px-6 py-1">
+                <summary class="font-semibold py-4 cursor-pointer flex justify-between items-center text-lg">
+                    Что говорить на первом собрании?
+                    <span class="text-[#e07a3d] group-open:rotate-180 transition-transform">↓</span>
+                </summary>
+                <div class="pb-5 text-[#475569]">Можно ничего не говорить. Многие в первый раз просто слушают. Если хочешь — представься по имени (или без него). Все по желанию.</div>
+            </details>
+            
+            <details class="group bg-white border border-[#e7d9c8] rounded-3xl px-6 py-1">
+                <summary class="font-semibold py-4 cursor-pointer flex justify-between items-center text-lg">
+                    Можно ли просто слушать?
+                    <span class="text-[#e07a3d] group-open:rotate-180 transition-transform">↓</span>
+                </summary>
+                <div class="pb-5 text-[#475569]">Да. На первом собрании многие именно так и делают. Никто не будет настаивать, чтобы тебя рассказывал о себе.</div>
+            </details>
+            
+            <details class="group bg-white border border-[#e7d9c8] rounded-3xl px-6 py-1">
+                <summary class="font-semibold py-4 cursor-pointer flex justify-between items-center text-lg">
+                    Что делать, если я боюсь идти один?
+                    <span class="text-[#e07a3d] group-open:rotate-180 transition-transform">↓</span>
+                </summary>
+                <div class="pb-5 text-[#475569]">Напиши или позвони — кто-то из участников встретит тебя у входа и проведет внутрь. Ты не будешь один.</div>
+            </details>
+            
+            <details class="group bg-white border border-[#e7d9c8] rounded-3xl px-6 py-1">
+                <summary class="font-semibold py-4 cursor-pointer flex justify-between items-center text-lg">
+                    Я употребил сегодня — что делать?
+                    <span class="text-[#e07a3d] group-open:rotate-180 transition-transform">↓</span>
+                </summary>
+                <div class="pb-5 text-[#475569]">Если ты хочешь прекратить — приходи. Многие приходили на первое собрание в состоянии употребления. Тебя не будут осуждать. Главное — желание.</div>
+            </details>
+        </div>
+    </section>
+
+    <!-- FINAL CALL -->
+    <section class="max-w-3xl mx-auto px-6 pb-16 text-center section">
+        <div class="bg-[#1e3a5f] text-[#f8f1e3] rounded-3xl p-10 md:p-14">
+            <h2 class="heading-serif text-3xl md:text-4xl tracking-tighter mb-4">Не нужно решать всю жизнь сегодня.</h2>
+            <p class="text-xl text-[#c8b9a0] mb-8">Просто приходи на одно собрание.</p>
+            
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button onclick="document.getElementById('schedule').scrollIntoView({ behavior: 'smooth' })" 
+                        class="btn-primary px-8 py-4 rounded-3xl font-semibold text-lg">
+                    Посмотреть расписание
+                </button>
+                <button onclick="document.getElementById('support-modal').classList.remove('hidden'); document.getElementById('support-modal').classList.add('flex')" 
+                        class="px-8 py-4 rounded-3xl font-semibold text-lg border-2 border-[#f8f1e3] text-[#f8f1e3] hover:bg-white/10 transition-colors">
+                    Мне нужна поддержка
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer contacts -->
+    <footer id="contacts" class="bg-[#1e3a5f] text-[#f8f1e3] pt-12 pb-8">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-y-10">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 bg-[#f8f1e3] rounded-2xl flex items-center justify-center">
+                            <span class="text-[#1e3a5f] text-lg font-bold tracking-tighter">ОС</span>
+                        </div>
+                        <div class="font-semibold text-xl">Олдскул • АН Уфа</div>
+                    </div>
+                    <div class="text-[#c8b9a0] text-sm max-w-xs">
+                        Сообщество взаимопомощи людей, которые хотят прекратить употребление.
+                    </div>
+                </div>
+                
+                <div class="space-y-4 text-sm">
+                    <div>
+                        <div class="font-semibold mb-1 text-[#f8f1e3]">Уфа</div>
+                        <a href="tel:+79173838380" class="hover:underline">+7 917 383-83-80</a>
+                        <div class="text-[#c8b9a0]">ежедневно 10:00–22:00</div>
+                    </div>
+                    
+                    <div>
+                        <div class="font-semibold mb-1 text-[#f8f1e3]">Бесплатная линия по России</div>
+                        <a href="tel:88001014212" class="hover:underline">8 800 101-42-12</a>
+                        <div class="text-[#c8b9a0]">круглосуточно</div>
+                    </div>
+                    
+                    <div class="pt-2 flex flex-wrap gap-3">
+                        <button onclick="openWhatsApp()" 
+                                class="flex items-center gap-2 bg-[#25D366] text-white px-5 py-2.5 rounded-2xl text-sm font-semibold hover:brightness-95 transition-all">
+                            <span>Написать в WhatsApp</span>
+                        </button>
+                        
+                        <a href="https://t.me/naufachat" target="_blank" 
+                           class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-5 py-2.5 rounded-2xl text-sm font-semibold transition-all">
+                            <span>Telegram</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12 pt-8 border-t border-white/20 text-xs text-[#c8b9a0] flex flex-col md:flex-row gap-y-2 md:items-center md:justify-between">
+                <div>© Группа «Олдскул» Анонимные Наркоманы, Уфа. 2026</div>
+                <div>Это не медицинская помощь. В экстренных случаях звоните 112.</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Fixed mobile support button -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#e7d9c8] z-50">
+        <button onclick="document.getElementById('support-modal').classList.remove('hidden'); document.getElementById('support-modal').classList.add('flex')"
+                class="support-btn w-full bg-[#e07a3d] text-white font-semibold py-4 rounded-3xl text-lg active:scale-[0.985] transition-transform">
+            Мне нужна поддержка
+        </button>
+    </div>
+
+    <!-- Support Modal -->
+    <div id="support-modal" onclick="if (event.target.id === 'support-modal') closeModal()" 
+         class="hidden fixed inset-0 bg-black/60 z-[60] items-center justify-center p-6">
+        <div onclick="event.stopImmediatePropagation()" 
+             class="bg-white rounded-3xl max-w-md w-full p-8 shadow-xl">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <div class="font-semibold text-2xl tracking-tight">Нужна поддержка?</div>
+                    <p class="text-[#475569] mt-1">Выбери удобный способ связаться</p>
+                </div>
+                <button onclick="closeModal()" class="text-3xl leading-none text-[#64748b] hover:text-[#1e3a5f]">×</button>
+            </div>
+            
+            <div class="space-y-3">
+                <a href="tel:+79173838380" 
+                   class="flex items-center justify-between w-full px-6 py-4 rounded-2xl border border-[#e7d9c8] hover:bg-[#f8f1e3] transition-colors group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-9 h-9 bg-[#1e3a5f] text-white rounded-2xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2 3 3 0 013 3v1m0 0v10a2 2 0 01-2 2 2 2 0 01-2-2v-1m0-10a2 2 0 012-2 3 3 0 013 3v10m0 0v1a2 2 0 01-2 2 2 2 0 01-2-2v-1" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="font-semibold">Позвонить в Уфе</div>
+                            <div class="text-sm text-[#64748b]">+7 917 383-83-80</div>
+                        </div>
+                    </div>
+                </a>
+                
+                <button onclick="openWhatsApp(); closeModal()" 
+                        class="flex items-center justify-between w-full px-6 py-4 rounded-2xl border border-[#e7d9c8] hover:bg-[#f8f1e3] transition-colors group text-left">
+                    <div class="flex items-center gap-4">
+                        <div class="w-9 h-9 bg-[#25D366] text-white rounded-2xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.198-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.372-.025-.521-.075-.149-.67-.966-.92-1.317-.247-.347-.5-.373-.67-.373-.172 0-.372.05-.57.25-.198.198-.76.74-.76 1.805 0 1.065.78 2.095.89 2.245.11.15 1.54 2.35 3.73 3.3 2.19.95 2.19.95 2.61 1.05.42.1 1.04.15 1.36-.1.32-.25 1.35-1.6 1.54-1.91.19-.31.19-.57.13-.67z"/>
+                                <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="font-semibold">Написать в WhatsApp</div>
+                            <div class="text-sm text-[#64748b]">Готовое сообщение уже есть</div>
+                        </div>
+                    </div>
+                </button>
+                
+                <a href="https://t.me/naufachat" target="_blank"
+                   class="flex items-center justify-between w-full px-6 py-4 rounded-2xl border border-[#e7d9c8] hover:bg-[#f8f1e3] transition-colors group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-9 h-9 bg-[#229ED9] text-white rounded-2xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212-.07-.062-.202-.04-.29-.02-.13.028-1.958 1.24-5.534 3.64-.523.352-.998.53-1.426.52-.47-.01-1.37-.3-2.04-.54-.82-.3-1.475-.46-1.42-.98.027-.26.37-.53 1.02-.8 3.96-1.71 6.6-2.84 7.94-3.4z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="font-semibold">Написать в Telegram</div>
+                            <div class="text-sm text-[#64748b]">@naufachat</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="mt-6 text-center">
+                <button onclick="closeModal()" 
+                        class="text-sm text-[#64748b] hover:text-[#1e3a5f]">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        function initializeTailwind() {
+            document.documentElement.style.setProperty('--accent', '#e07a3d');
+        }
+        
+        const scheduleData = {
+            0: { day: 'Воскресенье', times: ['20:00'] },
+            1: { day: 'Понедельник', times: ['19:00', '21:00'] },
+            2: { day: 'Вторник', times: ['20:00'] },
+            3: { day: 'Среда', times: ['20:00'] },
+            4: { day: 'Четверг', times: ['20:00'] },
+            5: { day: 'Пятница', times: ['18:30'] },
+            6: { day: 'Суббота', times: ['20:00'] }
+        };
+        
+        const dayNames = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+        
+        function getNextMeeting() {
+            const now = new Date();
+            const currentDay = now.getDay();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            
+            const todayTimes = scheduleData[currentDay]?.times || [];
+            for (let timeStr of todayTimes) {
+                const [h, m] = timeStr.split(':').map(Number);
+                const meetMinutes = h * 60 + m;
+                if (meetMinutes > currentMinutes) {
+                    return { dayIndex: currentDay, dayName: dayNames[currentDay], time: timeStr, isToday: true };
+                }
+            }
+            
+            for (let offset = 1; offset <= 7; offset++) {
+                const nextDayIndex = (currentDay + offset) % 7;
+                const nextTimes = scheduleData[nextDayIndex]?.times || [];
+                if (nextTimes.length > 0) {
+                    return { dayIndex: nextDayIndex, dayName: dayNames[nextDayIndex], time: nextTimes[0], isToday: false };
+                }
+            }
+            return null;
+        }
+        
+        function renderSchedule() {
+            const container = document.getElementById('schedule-grid');
+            container.innerHTML = '';
+            
+            const next = getNextMeeting();
+            
+            Object.keys(scheduleData).forEach(dayIndex => {
+                const dayData = scheduleData[dayIndex];
+                const isHighlighted = next && parseInt(dayIndex) === next.dayIndex;
+                
+                const card = document.createElement('div');
+                card.className = `meeting-card bg-white border border-[#e7d9c8] rounded-3xl p-5 ${isHighlighted ? 'highlight' : ''}`;
+                
+                let timesHTML = '';
+                dayData.times.forEach(time => {
+                    const isNextTime = isHighlighted && time === next.time;
+                    timesHTML += `<span class="time-pill inline-block mr-2 mb-2 ${isNextTime ? 'ring-2 ring-[#e07a3d]' : ''}">${time}</span>`;
+                });
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <div class="font-semibold text-xl">${dayData.day}</div>
+                            ${isHighlighted ? `<span class="highlight-badge mt-1 inline-block">БЛИЖАЙШЕЕ</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-1">${timesHTML}</div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+        
+        function updateHeroNearest() {
+            const next = getNextMeeting();
+            const el = document.getElementById('nearest-text');
+            
+            if (!next) {
+                el.innerHTML = 'Собрания проходят ежедневно';
+                return;
+            }
+            
+            let text = next.isToday ? `Сегодня в ${next.time}` : `${next.dayName} в ${next.time}`;
+            el.innerHTML = `<strong>${text}</strong>`;
+            
+            const heroCard = document.getElementById('hero-nearest');
+            if (next.isToday) heroCard.classList.add('border-emerald-300', 'bg-emerald-50/30');
+        }
+        
+        function openWhatsApp() {
+            const message = encodeURIComponent('Здравствуйте. Я хочу впервые прийти на группу “Олдскул”. Мне тревожно. Можете подсказать, как найти вход или встретить меня?');
+            window.open(`https://wa.me/79173838380?text=${message}`, '_blank');
+        }
+        
+        function openYandexMap() {
+            window.open('https://yandex.ru/maps/?text=Уфа%2C%20ул.%20%D0%90%D0%B9%D1%81%D0%BA%D0%B0%D1%8F%2C%2075%2F2', '_blank');
+        }
+        
+        function openGoogleMap() {
+            window.open('https://www.google.com/maps/search/?api=1&query=ул.+А%D0%B9%D1%81%D0%BA%D0%B0%D1%8F+75%2F2%2C+Уфа', '_blank');
+        }
+        
+        function closeModal() {
+            const modal = document.getElementById('support-modal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('support-modal');
+                if (!modal.classList.contains('hidden')) closeModal();
+            }
+        });
+        
+        function init() {
+            initializeTailwind();
+            renderSchedule();
+            updateHeroNearest();
+            setInterval(updateHeroNearest, 60000);
+        }
+        
+        window.onload = init;
+    </script>
+</body>
+</html>
